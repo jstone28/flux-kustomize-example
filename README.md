@@ -4,12 +4,13 @@
 
 ```bash
 kubectl create ns flux
-export GHUSER="YOURUSER"
+export GHUSER="jstone28"
 fluxctl install \
+--manifest-generation=true \
 --git-user=${GHUSER} \
 --git-email=${GHUSER}@users.noreply.github.com \
---git-url=git@github.com:${GHUSER}/flux-get-started \
---git-path=namespaces,workloads \
+--git-url=git@github.com:${GHUSER}/flux-kustomize-example \
+--git-path=staging \
 --namespace=flux | kubectl apply -f -
 ```
 
