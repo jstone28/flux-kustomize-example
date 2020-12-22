@@ -1,5 +1,18 @@
 # Using Flux with Kustomize
 
+## Installing
+
+```bash
+kubectl create ns flux
+export GHUSER="YOURUSER"
+fluxctl install \
+--git-user=${GHUSER} \
+--git-email=${GHUSER}@users.noreply.github.com \
+--git-url=git@github.com:${GHUSER}/flux-get-started \
+--git-path=namespaces,workloads \
+--namespace=flux | kubectl apply -f -
+```
+
 ## Scenario and Goals
 
 The following example makes use of Flux's manifest-generation feature
@@ -14,7 +27,7 @@ clusters while minimizing duplicated declarations.
 [`podinfo`](https://github.com/stefanprodan/k8s-podinfo) service. However, we
 have different requirments for each cluster:
 
-1. We want automated deployments for `staging` but not for `production` since we want a rubber-stamp 
+1. We want automated deployments for `staging` but not for `production` since we want a rubber-stamp
    every change. However, we want to still be able to make the changes with `fluxctl`.
 2. Since we expect `production` to have a higher load than `staging`, we want a higher replica range there.
 
@@ -36,7 +49,7 @@ is added to the your github fork.
 
 ## How does this example work?
 
-```
+```bash
 ├── .flux.yaml
 ├── base
 │   ├── demo-ns.yaml
@@ -53,9 +66,9 @@ is added to the your github fork.
     └── replicas-patch.yaml
 ```
 
-* `base` contains the base manifests. The resources to be deployed in 
+* `base` contains the base manifests. The resources to be deployed in
   `staging` and `production` are almost identical to the ones described here.
-* the `staging` and `production` directories make use of `base`, with a few patches, 
+* the `staging` and `production` directories make use of `base`, with a few patches,
   to generate the final manifests for each environment:
     * `staging/kustomization.yaml` and `production/kustomization.yaml`
        are Kustomize config files which indicate how to apply the patches.
@@ -63,10 +76,10 @@ is added to the your github fork.
        environment-specific Flux [annotations](https://docs.fluxcd.io/en/latest/tutorials/driving-flux/)
        and the container images to be deployed in each environment.
     * `production/replicas-patch.yaml` increases the number of replicas of podinfo in production.
-* `.flux.yaml` is used by Flux to generate and update manifests. 
-  Its commands are run in the directory (`staging` or `production`). 
-  In this particular case, `.flux.yaml` tells Flux to generate manifests running 
-  `kustomize build` and update policy annotations and container images by editing 
+* `.flux.yaml` is used by Flux to generate and update manifests.
+  Its commands are run in the directory (`staging` or `production`).
+  In this particular case, `.flux.yaml` tells Flux to generate manifests running
+  `kustomize build` and update policy annotations and container images by editing
   `flux-patch.yaml`, which will implicitly applied to the manifests generated with
   `kustomize build`.
 
